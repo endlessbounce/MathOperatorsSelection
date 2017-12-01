@@ -8,231 +8,333 @@ public class BestFitImpl {
         private long nums[];
         private boolean advanced;
         private boolean braces;
+        private String match;
         private ArrayList<String> results = new ArrayList<>();// stores all matches
 
-        CalculationMethods(long[] newNums, long newRes, boolean newAdvanced, boolean newBraces){
+        CalculationMethods(long[] newNums, long newRes, boolean newAdvanced, boolean newBraces) {
             this.nums = newNums;
             this.expectedResult = newRes;
             this.advanced = newAdvanced;
             this.braces = newBraces;
         }
-        
+
         public ArrayList<String> getResults() {
             return results;
         }
-        
-        public void add(long sum, int currIndex, String currentString, boolean braced){
-            
-            if(currIndex >= nums.length - 1){
 
-                if((sum + nums[currIndex]) == expectedResult){
-                    results.add(currentString + nums[currIndex]);
-                }
-                
-                return;
-            }
-            
-            //allows miltiplication and division operations
-            if(advanced){
-                
-                multiply(sum, nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "*", "add", braced);
-                divide(sum, nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "/", "add", braced);
-                
-                if(braces){
-                    //allows braces, not implemented
-                }
-                
-            }
-            
-            add(sum + nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "+", braced);
-            subtract(sum + nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "-", braced);
-            
+        public void setNums(long[] nums) {
+            this.nums = nums;
         }
 
-        public void subtract(long subtr, int currIndex, String currentString, boolean braced){
-            
-            if(currIndex >= nums.length - 1){
-                
-                if((subtr - nums[currIndex]) == expectedResult){
-                    results.add(currentString + nums[currIndex]);
-                }
-                
+        public String getMatch() {
+            return match;
+        }
+
+        public void add(long sum, int currIndex, String currentString, boolean braced) {
+
+            if (match != null) {
                 return;
             }
-            
+
+            if (currIndex >= nums.length - 1) {
+
+                //put the match into the list
+//                if ((sum + nums[currIndex]) == expectedResult) {
+//                    results.add(currentString + nums[currIndex]);
+//                }
+
+                //find first match and return
+                if ((sum + nums[currIndex]) == expectedResult) {
+                    match = currentString + nums[currIndex];
+                }
+
+                return;
+            }
+
             //allows miltiplication and division operations
-            if(advanced){
-                
-                multiply(subtr, nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "*", "sub", braced);
-                divide(subtr, nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "/", "sub",  braced);
-                
-                if(braces){
+            if (advanced) {
+
+                multiply(sum, nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "*", "add", braced);
+                divide(sum, nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "/", "add", braced);
+
+                if (braces) {
                     //allows braces, not implemented
                 }
-                
+
             }
-            
+
+            add(sum + nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "+", braced);
+            subtract(sum + nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "-", braced);
+
+        }
+
+        public void subtract(long subtr, int currIndex, String currentString, boolean braced) {
+
+            if (match != null) {
+                return;
+            }
+
+            if (currIndex >= nums.length - 1) {
+
+                //put the match into the list
+//                if ((subtr - nums[currIndex]) == expectedResult) {
+//                    results.add(currentString + nums[currIndex]);
+//                }
+
+                //find first match and return
+                if ((subtr - nums[currIndex]) == expectedResult) {
+                    match = currentString + nums[currIndex];
+                }
+
+                return;
+            }
+
+            //allows miltiplication and division operations
+            if (advanced) {
+
+                multiply(subtr, nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "*", "sub", braced);
+                divide(subtr, nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "/", "sub", braced);
+
+                if (braces) {
+                    //allows braces, not implemented
+                }
+
+            }
+
             add(subtr - nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "+", braced);
             subtract(subtr - nums[currIndex], currIndex + 1, currentString + nums[currIndex] + "-", braced);
         }
 
-        public void multiply(long sum, long toMult, int currIndex, String resultString, String priorOperation, boolean braced){
-            
-            long tempSum = 0;
-            //if end of array is reached
-            if(currIndex >= nums.length - 1){
-                
-                if(priorOperation.equals("add")){
-                    tempSum = sum + toMult * nums[currIndex];
-                }else if(priorOperation.equals("sub")){
-                    tempSum = sum - toMult * nums[currIndex];
-                }else{
-                    tempSum = toMult * nums[currIndex];
-                }
-                
-                if(tempSum == expectedResult){
-                    results.add(resultString + nums[currIndex]);
-                }
-                
+        public void multiply(long sum, long toMult, int currIndex, String resultString, String priorOperation, boolean braced) {
+
+            if (match != null) {
                 return;
             }
-            
-            if(priorOperation.equals("add")){
-                add(sum + toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "+", braced);
-                subtract(sum + toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "-", braced);
-                multiply(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "*", priorOperation, braced);
-                divide(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "/", priorOperation, braced);
-            }else if(priorOperation.equals("sub")){
-                add(sum - toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "+", braced);
-                subtract(sum - toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "-", braced);
-                multiply(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "*", priorOperation, braced);
-                divide(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "/", priorOperation, braced);
-            }else{
-                add(toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "+", braced);
-                subtract(toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "-", braced);
-                multiply(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "*", "", braced);
-                divide(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "/", "", braced);
+
+            long tempSum;
+            //if end of array is reached
+            if (currIndex >= nums.length - 1) {
+
+                switch (priorOperation) {
+                    case "add":
+                        tempSum = sum + toMult * nums[currIndex];
+                        break;
+                    case "sub":
+                        tempSum = sum - toMult * nums[currIndex];
+                        break;
+                    default:
+                        tempSum = toMult * nums[currIndex];
+                        break;
+                }
+
+                //put the match into the list
+//                if (tempSum == expectedResult) {
+//                    results.add(resultString + nums[currIndex]);
+//                }
+
+                //find first match and return
+                if (tempSum == expectedResult) {
+                    match = resultString + nums[currIndex];
+                }
+
+                return;
             }
-            
-            if(braces){
+
+            switch (priorOperation) {
+                case "add":
+                    add(sum + toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "+", braced);
+                    subtract(sum + toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "-", braced);
+                    multiply(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "*", priorOperation, braced);
+                    divide(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "/", priorOperation, braced);
+                    break;
+                case "sub":
+                    add(sum - toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "+", braced);
+                    subtract(sum - toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "-", braced);
+                    multiply(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "*", priorOperation, braced);
+                    divide(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "/", priorOperation, braced);
+                    break;
+                default:
+                    add(toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "+", braced);
+                    subtract(toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "-", braced);
+                    multiply(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "*", "", braced);
+                    divide(sum, toMult * nums[currIndex], currIndex + 1, resultString + nums[currIndex] + "/", "", braced);
+                    break;
+            }
+
+            if (braces) {
                 //allows braces, not implemented
             }
-                    
+
         }
 
-        public void divide(long sum, long toDiv, int currIndex, String resultString, String priorOperation, boolean braced){
-            
-            if(nums[currIndex] != 0 && toDiv % nums[currIndex] == 0){
+        public void divide(long sum, long toDiv, int currIndex, String resultString, String priorOperation, boolean braced) {
+
+            if (match != null) {
+                return;
+            }
+
+            if (nums[currIndex] != 0 && toDiv % nums[currIndex] == 0) {
                 toDiv /= nums[currIndex];
-            }else{
+            } else {
                 return;
             }
-            
-            long tempSum = 0;
+
+            long tempSum;
             //if end of array is reached
-            if(currIndex >= nums.length - 1){
-            
-                if(priorOperation.equals("add")){
-                    tempSum = sum + toDiv;
-                }else if(priorOperation.equals("sub")){
-                    tempSum = sum - toDiv;
-                }else{
-                    tempSum = toDiv;
+            if (currIndex >= nums.length - 1) {
+
+                switch (priorOperation) {
+                    case "add":
+                        tempSum = sum + toDiv;
+                        break;
+                    case "sub":
+                        tempSum = sum - toDiv;
+                        break;
+                    default:
+                        tempSum = toDiv;
+                        break;
                 }
-                
-                if(tempSum == expectedResult){
-                    results.add(resultString + nums[currIndex]);
+
+                //put the match into the list
+//                if (tempSum == expectedResult) {
+//                    results.add(resultString + nums[currIndex]);
+//                }
+
+                //find first match and return
+                if (tempSum == expectedResult) {
+                    match = resultString + nums[currIndex];
                 }
-                
+
                 return;
             }
-            
-            if(priorOperation.equals("add")){
-                add(sum + toDiv, currIndex + 1, resultString + nums[currIndex] + "+", braced);
-                subtract(sum + toDiv, currIndex + 1, resultString + nums[currIndex] + "-", braced);
-                multiply(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "*", priorOperation, braced);
-                divide(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "/", priorOperation, braced);
-            }else if(priorOperation.equals("sub")){
-                add(sum - toDiv, currIndex + 1, resultString + nums[currIndex] + "+", braced);
-                subtract(sum - toDiv, currIndex + 1, resultString + nums[currIndex] + "-", braced);
-                multiply(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "*", priorOperation, braced);
-                divide(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "/", priorOperation, braced);
-            }else{
-                add(toDiv, currIndex + 1, resultString + nums[currIndex] + "+", braced);
-                subtract(toDiv, currIndex + 1, resultString + nums[currIndex] + "-", braced);
-                multiply(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "*", "", braced);
-                divide(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "/", "", braced);
+
+            switch (priorOperation) {
+                case "add":
+                    add(sum + toDiv, currIndex + 1, resultString + nums[currIndex] + "+", braced);
+                    subtract(sum + toDiv, currIndex + 1, resultString + nums[currIndex] + "-", braced);
+                    multiply(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "*", priorOperation, braced);
+                    divide(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "/", priorOperation, braced);
+                    break;
+                case "sub":
+                    add(sum - toDiv, currIndex + 1, resultString + nums[currIndex] + "+", braced);
+                    subtract(sum - toDiv, currIndex + 1, resultString + nums[currIndex] + "-", braced);
+                    multiply(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "*", priorOperation, braced);
+                    divide(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "/", priorOperation, braced);
+                    break;
+                default:
+                    add(toDiv, currIndex + 1, resultString + nums[currIndex] + "+", braced);
+                    subtract(toDiv, currIndex + 1, resultString + nums[currIndex] + "-", braced);
+                    multiply(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "*", "", braced);
+                    divide(sum, toDiv, currIndex + 1, resultString + nums[currIndex] + "/", "", braced);
+                    break;
             }
-            
-            if(braces){
+
+            if (braces) {
                 //allows braces, not implemented
             }
 
         }
 
     }
-    public class StringProcessor implements BestFitInt{
-        private long nums [];//array for numbers
+
+    public class StringProcessor implements BestFitInt {
+        private ArrayList<String> strings = new ArrayList<>();//contains strings of summand combinations
+        private ArrayList<long[]> numbers = new ArrayList<>();//stores arrays of numbers to operate on
+        private long nums[];//temporary array for numbers used while string to array of nums conversion
         private long expectedResult;
         private CalculationMethods calc;
         private boolean advanced;//flag indicating usage of multiplication and division
         private boolean braces;//flag indicating usage of parentheses
-        
-        //checks if the string contains numbers only and if it's a non-zero length string
-        private boolean preparations(String digits, long expectedResult){
-            this.expectedResult = expectedResult;
 
-            if(digits.length() < 2){
+        //converts the input string into multiple strings with all possible combinations of summands
+        private void parser(String toPasre, String curString, int aim) {
+
+            if (toPasre.length() <= 1) return;
+
+            String left = toPasre.substring(0, aim + 1);
+            String right = toPasre.substring(aim + 1);
+
+            String result = curString + left + "-" + right;
+            strings.add(result);
+
+            for (int i = 0; i < right.length() - 1; i++) {
+                parser(right, curString + left + "-", i);
+            }
+
+        }
+
+        //checks if the string contains numbers only and if it's a non-zero length string
+        private boolean preparations(String digits, long expectedResult) {
+            this.expectedResult = expectedResult;
+            numbers.clear();
+            strings.clear();
+
+            if (digits.length() < 2) {
                 System.out.println("The string must be of length 2+");
                 return false;
             }
 
-            nums = new long[digits.length()];
+            //pick out all possible combinations of summands
+            for (int i = 0; i < digits.length() - 1; i++) {
+                parser(digits, "", i);
+            }
 
-            try{    
+            try {
 
-                //convert the string to arr of integers
-                for(int i = 0; i < nums.length; i++){
+                //convert strings of number combinations to number arrays
+                for (String string : strings) {
 
-                    char temp = digits.charAt(i);
-                    nums[i] = Long.parseLong(Character.toString(temp));
-                    
+                    String tempStringArr[] = string.split("-");
+                    nums = new long[tempStringArr.length];
+
+                    for (int i = 0; i < nums.length; i++) {
+                        nums[i] = Long.parseLong(tempStringArr[i]);
+                    }
+
+                    numbers.add(nums);
                 }
 
-            }catch(NumberFormatException ex){
+
+            } catch (NumberFormatException ex) {
                 System.out.println("Incorrect input string.");
                 return false;
             }
 
-            calc = new CalculationMethods(nums, expectedResult, advanced, braces);
+            calc = new CalculationMethods(null, expectedResult, advanced, braces);
 
             return true;
         }
 
         @Override
         public String fitPlusMinus(String digits, long expectedResult) {
-            
+
             //advanced math functions and braces are turned off 
             boolean launch = preparations(digits, expectedResult);
 
-            if(!launch){
-                
-                if(advanced){
+            if (!launch) {
+
+                if (advanced) {
                     return "false";
                 }
-                
+
                 return "";
             }
-            
-            calc.add(nums[0], 1, nums[0] + "+", false);
-            calc.subtract(nums[0], 1, nums[0] + "-", false);
-            
-            if(calc.getResults().size() > 0){
-                return calc.getResults().get(0);
-            }else{
+
+            for (long[] number : numbers) {
+
+                calc.setNums(number);
+
+                calc.add(number[0], 1, number[0] + "+", false);
+                calc.subtract(number[0], 1, number[0] + "-", false);
+
+            }
+
+            if (calc.getMatch() != null) {
+                return calc.getMatch();
+            } else {
                 return "";
             }
-            
+
         }
 
         @Override
@@ -240,22 +342,28 @@ public class BestFitImpl {
             advanced = true;
             String result = fitPlusMinus(digits, expectedResult);
 
-            if(result.equals("false")){
+            if (result.equals("false")) {
                 return "";
             }
-            
-            calc.multiply(0, nums[0], 1, nums[0] + "*", "", false);
-            calc.divide(0, nums[0], 1, nums[0] + "/", "", false);
-            
+
+            for (long[] number : numbers) {
+
+                calc.setNums(number);
+
+                calc.multiply(0, number[0], 1, number[0] + "*", "", false);
+                calc.divide(0, number[0], 1, number[0] + "/", "", false);
+
+            }
+
             advanced = false;
 
-            if(calc.getResults().size() > 0){
-                return calc.getResults().get(0);
-            }else{
+            if (calc.getMatch() != null) {
+                return calc.getMatch();
+            } else {
                 return "";
             }
         }
-        
+
         @Override
         public String fitBraces(String digits, long expectedResult) {
             //no implementation here yet
@@ -266,11 +374,11 @@ public class BestFitImpl {
 
     public static void main(String[] args) {
         BestFitImpl.StringProcessor proc = new BestFitImpl().new StringProcessor();
-        
-        String result = proc.fitPlusMinus("7654", 4);
+
+        String result = proc.fitPlusMinus("1111163", 64);
         System.out.println("fitPlusMinus(): " + result);
-        
-        String result1 = proc.fit("8363653", 7);
+
+        String result1 = proc.fit("1111163", 64);
         System.out.println("fit():" + result1);
     }
 
